@@ -4,14 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "djsv": "^3.0.3",
-    "prom-client": "^10.2.2"
+    "prom-client": "^10.2.2",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
