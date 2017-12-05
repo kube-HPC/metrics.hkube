@@ -10,7 +10,7 @@ branches:
 install:
 - npm install
 - npm install -g snyk
-- snyk test
+# - snyk test
 cache:
   directories:
   - node_modules
@@ -25,7 +25,7 @@ after_success:
 - git checkout -b version-branch
 - npm version patch -m "$(git log -1 --pretty=%B) .... bump version [skip ci]"
 - git push origin version-branch:master --follow-tags
-- snyk monitor
+# - snyk monitor
 deploy:
   skip_cleanup: true
   provider: npm
