@@ -10,7 +10,7 @@ branches:
 install:
 - npm install
 - npm install -g snyk
-# - snyk test
+- snyk test
 cache:
   directories:
   - node_modules
@@ -25,7 +25,7 @@ after_success:
 - git checkout -f -b version-branch
 - npm version patch -m "$(git log -1 --pretty=%B) .... bump version [skip ci]"
 - git push origin version-branch:master --follow-tags
-# - snyk monitor
+- snyk monitor
 deploy:
   skip_cleanup: true
   provider: npm
@@ -37,3 +37,4 @@ env:
   global:
   - secure: cKUQYtsYLaWuFdJgEnF1xQ5A7/ZBY2AUuGGOLma3EeYh24O+rk6vogfhsesEJKdHXVE7o3VxoQZGs4MDVkWbUj2H+rAvIJcXsSt6TFOIsjkBKI8/xAnjoVE/FVWEI566g//eTz9tKpiTRNGic+99TKuxGe0j4cfq96eXIBALE0DO3QgRoUsVK2Rj07NSxJ7p/VumEe/RXnegt2u6r+Ts5ftZLlwJ16nBbsPZVXmCVTnU2FoogU0IpOy2lL6A6RDeF1ayzJ0GNd89sdWWKtLodvJ1fEHJ/rFLa2e7a2+GYZSdOPMiliEfe8JUmh+M9mKXfRi8roJeXwSa45pUA8Hma2DgCOHKks9BYnkub7sUoL7v9rdW4XfTfJGqS/WOvw+WrVSMOGbbDouCwuTu+b9ii6VOLgxKMTl4nWEN68BUdoPxZhcvj7C8aTsIgHhAKxTJmNvnwVc68pAKkcfP6wje/xgf58XYWReSPjGzDfKgZxlGcVnD7cCBXq6M0Erl8B1z1TKcYaWt+Da+nlLIKlpi2/rsinuifhoysPJ9b3KD7h6QNM5+lij0UqyWeVKviYsWRwI+VnURtaLmTPnr8zyhWqGULIOnsz++vdfRT54koB9VcGC0WKOa8/RSj821ik20Ht0eRE5rk9VbFVwYVsS2YfIYQqttImsg6mVkmYycOGc=
   - secure: LUiQZ+QKf7nwt+cFsU4BO5GkNQMxyeDAK8ktRu4OzlRPjYZknJIVFHtz9dOXh1+k6PgJo/QbPOsjn0wIA4cPkROLipUt4V9iImqC7fzKR/ced3LsWByLoCoryE4FJYiUsAKjbt2pGzHjUiwnuApug4FyAhLeUFi2BRQcRGJ0wrjnJIbaHSCP1Mrn0Lv0JMrjjxcP33crdL6G5RfJv9/LgbUxJxhrugUWoNVW2Y8eBn11yHg+4P5mV2rrB3GCQLO8NhP3Ok9Da5CAaELeE+lYBQtNi8sLIRx0RvvgR8+wmaQbRyVyopdm63QSrV+w33tQRqfsbrFs67b2p5tkjilcLDOxFc/RIXV+c8crXxBk76QSBs+3+K41VgUgNECpNI3AKYyA3kKIWKfEpKu9/MQVRmNMEjOB/eqWoXvu202zx7siIH1l3/nu76QijyCQXWCWOtfCX+UP8CENq/rKnwX+2Kc/aR94nj6xXUUCQNVsWfh5JbSUFQ8NPhURPVEHDlxYNppzLdOpW10Wu/GYdYyZSdNpCURY4yeiCVDkUG2aDOR5uodwWJz3+o2X73Cm/ClNpBxXDJV4Bj4CHs+0+NQff/BgsaRZK6l4SUfm4UqOWLds3zqBPRx0IJ5zax7UZtuL8qD1y+RI0lI91daGHnB5W+xPwcm7RkXIsLS0msQZ/j8=
+  - secure: Uie/kriti5RohA+lzdqC9urkLBDlgmYyyNwPtyP6iXD4cxwfoYur7dEUxgEMKDjl6AT4ilEiXPmVKjgEXB+/8VJCh+ycz/VzGvUm+hJfsgbBT6+KsL53whCHQE69JEwMnNixZg2j/UFE8XGEugH9vFUVBvKsfaTUlNPzvA1dGrwv5jkGx0YKv9pvUHERrX1EEwS67y+s2BJly97+OmaEudiL4HDz+2FMp1TOPpJE05rQHvLMQZrAbAVdgNLEkHuW7eCF27xd89jRvNlEL87PoPdk3WOQ2qgR/QdNnTc0AvL/mqfx+JekvFhj9QEZ26s6HCLPv8p2Lqys5f6ga3o0tVBh1C5cTevsUCctX1S1EIizxeZgFG41U0ciHBRzXQJ+DRMxGXcAhibjpS+WB7XWI/Zwvh58Setf7tPS+R2XUyYMk/oQWNJO4px/oX+DV32+FIvKrwAkWG21rgUw5lkXuX3ku7uYFVrXs0g3FjEpMjXrJtzwBpxMZiiQvo6cJCUnc3jj/IwjhJgEa5Lbh3ork+stu3gutDkVTOVA7EIPyApw34pSmt5mesGWsE9fb0fT1KI3DT9qGACw2/ofUfMdAWWztWvyPz38jFB4vpn4aQxiLVhKw7xyl5aRJKEEtiMooef+7Lr2g3bssLSqkrX1kUVoyePgaMxfXvfR9ygfVVo=
