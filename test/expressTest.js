@@ -95,6 +95,11 @@ describe('With RestServer or internal server', () => {
     })
 
     describe('with internal server', () => {
+        afterEach(async () => {
+            if (metrics._server){
+                await metrics._server.stop()
+            }
+        });
         it('should create server', async () => {
             const port = await get_port();
             await metrics.init({

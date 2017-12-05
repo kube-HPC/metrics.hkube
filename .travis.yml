@@ -1,0 +1,39 @@
+sudo: required
+language: node_js
+node_js:
+- '8'
+services:
+- docker
+branches:
+  only:
+  - master
+install:
+- npm install
+- npm install -g snyk
+- snyk test
+cache:
+  directories:
+  - node_modules
+script:
+- NODE_ENV=test npm run-script test-travis
+after_script: cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+after_success:
+- git config --global user.email "travis@travis-ci.org"
+- git config --global user.name "Travis CI"
+- git remote set-url --push origin "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git"
+- git remote -v
+- git checkout -b version-branch
+- npm version patch -m "$(git log -1 --pretty=%B) .... bump version [skip ci]"
+- git push origin version-branch:master --follow-tags
+- snyk monitor
+deploy:
+  skip_cleanup: true
+  provider: npm
+  email: yehiyam@gmail.com
+  api_key: "$NPM_AUTH_TOKEN"
+  on:
+    branch: master
+env:
+  global:
+  - secure: cKUQYtsYLaWuFdJgEnF1xQ5A7/ZBY2AUuGGOLma3EeYh24O+rk6vogfhsesEJKdHXVE7o3VxoQZGs4MDVkWbUj2H+rAvIJcXsSt6TFOIsjkBKI8/xAnjoVE/FVWEI566g//eTz9tKpiTRNGic+99TKuxGe0j4cfq96eXIBALE0DO3QgRoUsVK2Rj07NSxJ7p/VumEe/RXnegt2u6r+Ts5ftZLlwJ16nBbsPZVXmCVTnU2FoogU0IpOy2lL6A6RDeF1ayzJ0GNd89sdWWKtLodvJ1fEHJ/rFLa2e7a2+GYZSdOPMiliEfe8JUmh+M9mKXfRi8roJeXwSa45pUA8Hma2DgCOHKks9BYnkub7sUoL7v9rdW4XfTfJGqS/WOvw+WrVSMOGbbDouCwuTu+b9ii6VOLgxKMTl4nWEN68BUdoPxZhcvj7C8aTsIgHhAKxTJmNvnwVc68pAKkcfP6wje/xgf58XYWReSPjGzDfKgZxlGcVnD7cCBXq6M0Erl8B1z1TKcYaWt+Da+nlLIKlpi2/rsinuifhoysPJ9b3KD7h6QNM5+lij0UqyWeVKviYsWRwI+VnURtaLmTPnr8zyhWqGULIOnsz++vdfRT54koB9VcGC0WKOa8/RSj821ik20Ht0eRE5rk9VbFVwYVsS2YfIYQqttImsg6mVkmYycOGc=
+  - secure: LUiQZ+QKf7nwt+cFsU4BO5GkNQMxyeDAK8ktRu4OzlRPjYZknJIVFHtz9dOXh1+k6PgJo/QbPOsjn0wIA4cPkROLipUt4V9iImqC7fzKR/ced3LsWByLoCoryE4FJYiUsAKjbt2pGzHjUiwnuApug4FyAhLeUFi2BRQcRGJ0wrjnJIbaHSCP1Mrn0Lv0JMrjjxcP33crdL6G5RfJv9/LgbUxJxhrugUWoNVW2Y8eBn11yHg+4P5mV2rrB3GCQLO8NhP3Ok9Da5CAaELeE+lYBQtNi8sLIRx0RvvgR8+wmaQbRyVyopdm63QSrV+w33tQRqfsbrFs67b2p5tkjilcLDOxFc/RIXV+c8crXxBk76QSBs+3+K41VgUgNECpNI3AKYyA3kKIWKfEpKu9/MQVRmNMEjOB/eqWoXvu202zx7siIH1l3/nu76QijyCQXWCWOtfCX+UP8CENq/rKnwX+2Kc/aR94nj6xXUUCQNVsWfh5JbSUFQ8NPhURPVEHDlxYNppzLdOpW10Wu/GYdYyZSdNpCURY4yeiCVDkUG2aDOR5uodwWJz3+o2X73Cm/ClNpBxXDJV4Bj4CHs+0+NQff/BgsaRZK6l4SUfm4UqOWLds3zqBPRx0IJ5zax7UZtuL8qD1y+RI0lI91daGHnB5W+xPwcm7RkXIsLS0msQZ/j8=
