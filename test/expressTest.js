@@ -156,4 +156,45 @@ describe('With RestServer or internal server', () => {
             expect(mock_response._getData()).to.include('m1_histogram_count{l1="1",l2="2"} 1');
         });
     });
+
+    describe('with middleware',()=>{
+        beforeEach(() => {
+            server = new RestServer();
+        });
+        afterEach(async () => {
+            if (server){
+                await server.stop();
+            }
+    
+        });
+
+        it('should init with middleware', async () => {
+            
+             await metrics.init(config.metrics);
+             const port = await get_port();
+             const middleware = metrics.getMiddleware();
+             metrics.getMiddleware();
+             const {app} = await server.start(Object.assign({
+                 routes:[metrics.getRouter(),{
+                     route:'/testRoute',router:(req,res,next)=>{
+                        res.json('ok');
+                        next();
+                     }
+                 }],
+                 port
+             },middleware));
+             const mock_response = http_mocks.createResponse();
+             const mock_request = http_mocks.createRequest({
+                 method: 'GET',
+                 url: '/testRoute'
+             });
+             app.handle(mock_request, mock_response);
+             expect(metrics.metrics()).to.include('API_REQUEST_MEASURE_counter{method="GET",route="/testRoute",code="200"} 1');
+             expect(metrics.metrics()).to.include('API_REQUEST_MEASURE_histogram_count{method="GET",route="/testRoute",code="200"} 1');
+ 
+         });
+
+        
+
+    })
 });
