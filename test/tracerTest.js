@@ -7,7 +7,7 @@ chai.use(chaiAsPromised);
 
 describe('Tracer', () => {
     beforeEach((done) => {
-        tracer._spanStack = [];
+        tracer._spanStacks.clear();
         if (tracer._tracer) {
             tracer._tracer.close(() => {
                 tracer._tracer = null;
@@ -73,6 +73,19 @@ describe('Tracer', () => {
             });
             expect(() => tracer.startSpan({})).to.throw("data should have required property 'name'");
         });
+
+        it('should return null span stack without id', () => {
+            expect(tracer._getSpanStack()).to.be.null;
+            expect(tracer.topSpan()).to.be.null;
+            expect(tracer.pop()).to.be.null;
+        });
+
+        it('should return null span stack with id without spans', () => {
+            tracer._spanStacks.set('id1', []);
+            expect(tracer._getSpanStack('id1')).to.be.empty;
+            expect(tracer.topSpan('id1')).to.be.null;
+            expect(tracer.pop('id1')).to.be.null;
+        });
         it('should generate unique id', async () => {
             await tracer.init({
                 tracerConfig: {
@@ -115,10 +128,10 @@ describe('Tracer', () => {
 
             });
             const span = tracer.startSpan({ name: 'test1' });
-            expect(tracer._spanStack).to.have.lengthOf(1);
+            expect(tracer._spanStacks.get(span.id)).to.have.lengthOf(1);
             expect(tracer._tracer._reporter.spans).to.be.empty;
             span.finish();
-            expect(tracer._spanStack).to.be.empty;
+            expect(tracer._getSpanStack(span.id)).to.be.empty;
             expect(tracer._tracer._reporter.spans).to.have.lengthOf(1);
         });
         it('should add tags', async () => {
@@ -170,14 +183,14 @@ describe('Tracer', () => {
 
             });
             const parent = tracer.startSpan({ name: 'parent' });
-            expect(tracer._spanStack).to.have.lengthOf(1);
-            const span = tracer.startSpan({ name: 'test1', parentRelationship: tracer.parentRelationships.childOf });
-            expect(tracer._spanStack).to.have.lengthOf(2);
+            expect(tracer._getSpanStack(parent.id)).to.have.lengthOf(1);
+            const span = tracer.startSpan({ id: parent.id, name: 'test1', parentRelationship: tracer.parentRelationships.childOf });
+            expect(tracer._getSpanStack(span.id)).to.have.lengthOf(2);
             expect(tracer._tracer._reporter.spans).to.be.empty;
             span.finish();
-            expect(tracer._spanStack).to.have.lengthOf(1);
+            expect(tracer._getSpanStack(span.id)).to.have.lengthOf(1);
             parent.finish();
-            expect(tracer._spanStack).to.be.empty;
+            expect(tracer._getSpanStack(span.id)).to.be.empty;
             expect(tracer._tracer._reporter.spans).to.have.lengthOf(2);
             expect(tracer._tracer._reporter.spans[0].context().parentIdStr).to.eql(tracer._tracer._reporter.spans[1].context().spanIdStr);
         });
@@ -192,19 +205,20 @@ describe('Tracer', () => {
 
             });
             const parent = tracer.startSpan({ name: 'parent' });
-            tracer._spanStack = [];
-            expect(tracer._spanStack).to.have.lengthOf(0);
+            tracer._spanStacks.clear();
+            expect(tracer._getSpanStack(parent.id)).to.have.lengthOf(0);
             const span = tracer.startSpan({
+                id: parent.id,
                 name: 'test1',
                 parentRelationship: tracer.parentRelationships.childOf,
                 parent: parent.context()
             });
-            expect(tracer._spanStack).to.have.lengthOf(1);
+            expect(tracer._getSpanStack(parent.id)).to.have.lengthOf(1);
             expect(tracer._tracer._reporter.spans).to.be.empty;
             span.finish();
-            expect(tracer._spanStack).to.have.lengthOf(0);
+            expect(tracer._getSpanStack(parent.id)).to.have.lengthOf(0);
             parent.finish();
-            expect(tracer._spanStack).to.be.empty;
+            expect(tracer._getSpanStack(parent.id)).to.be.empty;
             expect(tracer._tracer._reporter.spans).to.have.lengthOf(2);
             expect(tracer._tracer._reporter.spans[0].context().parentIdStr).to.eql(tracer._tracer._reporter.spans[1].context().spanIdStr);
         });
@@ -219,14 +233,14 @@ describe('Tracer', () => {
 
             });
             const parent = tracer.startSpan({ name: 'parent' });
-            expect(tracer._spanStack).to.have.lengthOf(1);
-            const span = tracer.startSpan({ name: 'test1' });
-            expect(tracer._spanStack).to.have.lengthOf(2);
+            expect(tracer._getSpanStack(parent.id)).to.have.lengthOf(1);
+            const span = tracer.startSpan({ id: parent.id, name: 'test1' });
+            expect(tracer._getSpanStack(parent.id)).to.have.lengthOf(2);
             expect(tracer._tracer._reporter.spans).to.be.empty;
             span.finish();
-            expect(tracer._spanStack).to.have.lengthOf(1);
+            expect(tracer._getSpanStack(parent.id)).to.have.lengthOf(1);
             parent.finish();
-            expect(tracer._spanStack).to.be.empty;
+            expect(tracer._getSpanStack(parent.id)).to.be.empty;
             expect(tracer._tracer._reporter.spans).to.have.lengthOf(2);
             expect(tracer._tracer._reporter.spans[0].context().parentIdStr)
                 .to.eql(tracer._tracer._reporter.spans[1].context().spanIdStr);
@@ -241,7 +255,7 @@ describe('Tracer', () => {
                 }
 
             });
-            expect(tracer._spanStack).to.be.empty;
+            // expect(tracer._spanStack).to.be.empty;
             const parent = tracer.startSpan({ name: 'parent', parentRelationship: tracer.parentRelationships.childOf });
             parent.finish();
             expect(tracer._tracer._reporter.spans[0].context().parentIdStr).to.not.exist;
@@ -257,7 +271,7 @@ describe('Tracer', () => {
 
             });
             const parent = tracer.startSpan({ name: 'parent' });
-            const span = tracer.startSpan({ name: 'test1', parentRelationship: tracer.parentRelationships.follows });
+            const span = tracer.startSpan({ id: parent.id, name: 'test1', parentRelationship: tracer.parentRelationships.follows });
             expect(tracer._tracer._reporter.spans).to.be.empty;
             span.finish();
             parent.finish();
@@ -274,9 +288,57 @@ describe('Tracer', () => {
                     reporter: new InMemoryReporter()
                 }
             });
-            expect(tracer._spanStack).to.be.empty;
-            expect(tracer.topSpan).to.not.exist;
-            expect(tracer.pop()).to.not.exist;
+            expect(tracer._getSpanStack('dummyId')).to.be.empty;
+            expect(tracer.topSpan('dummyId')).to.not.exist;
+            expect(tracer.pop('dummyId')).to.not.exist;
+        });
+
+        it('should support 2 span stacks', async () => {
+            await tracer.init({
+                tracerConfig: {
+                    serviceName: 'test',
+                },
+                tracerOptions: {
+                    reporter: new InMemoryReporter()
+                }
+            });
+            const id1Parent = tracer.startSpan({ id: 'id1', name: 'parent' });
+            const id1span = tracer.startSpan({ id: id1Parent.id, name: 'test1', parentRelationship: tracer.parentRelationships.follows });
+
+            const id2Parent = tracer.startSpan({ id: 'id2', name: 'parent' });
+            const id2span = tracer.startSpan({ id: id2Parent.id, name: 'test1', parentRelationship: tracer.parentRelationships.follows });
+
+            id1span.finish();
+            id1Parent.finish();
+            id2span.finish();
+            id2Parent.finish();
+            expect(tracer._tracer._reporter.spans).to.have.lengthOf(4);
+            expect(tracer._tracer._reporter.spans[0].context().parentIdStr).to.eql(tracer._tracer._reporter.spans[1].context().spanIdStr);
+            expect(tracer._tracer._reporter.spans[2].context().parentIdStr).to.eql(tracer._tracer._reporter.spans[3].context().spanIdStr);
+        });
+
+        it('should support 2 span stacks different order', async () => {
+            await tracer.init({
+                tracerConfig: {
+                    serviceName: 'test',
+                },
+                tracerOptions: {
+                    reporter: new InMemoryReporter()
+                }
+            });
+            const id1Parent = tracer.startSpan({ id: 'id1', name: 'parent' });
+            const id1span = tracer.startSpan({ id: id1Parent.id, name: 'test1', parentRelationship: tracer.parentRelationships.follows });
+
+            const id2Parent = tracer.startSpan({ id: 'id2', name: 'parent' });
+            const id2span = tracer.startSpan({ id: id2Parent.id, name: 'test1', parentRelationship: tracer.parentRelationships.follows });
+
+            id1span.finish();
+            id2span.finish();
+            id1Parent.finish();
+            id2Parent.finish();
+            expect(tracer._tracer._reporter.spans).to.have.lengthOf(4);
+            expect(tracer._tracer._reporter.spans[0].context().parentIdStr).to.eql(tracer._tracer._reporter.spans[2].context().spanIdStr);
+            expect(tracer._tracer._reporter.spans[1].context().parentIdStr).to.eql(tracer._tracer._reporter.spans[3].context().spanIdStr);
         });
     });
 });
