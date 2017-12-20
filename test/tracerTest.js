@@ -181,6 +181,30 @@ describe('Tracer', () => {
             expect(tracer._tracer._reporter.spans).to.have.lengthOf(2);
             expect(tracer._tracer._reporter.spans[0].context().parentIdStr).to.eql(tracer._tracer._reporter.spans[1].context().spanIdStr);
         });
+
+        it('should finish span with default child relationship', async () => {
+            await tracer.init({
+                tracerConfig: {
+                    serviceName: 'test',
+                },
+                tracerOptions: {
+                    reporter: new InMemoryReporter()
+                }
+
+            });
+            const parent = tracer.startSpan({ name: 'parent' });
+            expect(tracer._spanStack).to.have.lengthOf(1);
+            const span = tracer.startSpan({ name: 'test1' });
+            expect(tracer._spanStack).to.have.lengthOf(2);
+            expect(tracer._tracer._reporter.spans).to.be.empty;
+            span.finish();
+            expect(tracer._spanStack).to.have.lengthOf(1);
+            parent.finish();
+            expect(tracer._spanStack).to.be.empty;
+            expect(tracer._tracer._reporter.spans).to.have.lengthOf(2);
+            expect(tracer._tracer._reporter.spans[0].context().parentIdStr)
+                .to.eql(tracer._tracer._reporter.spans[1].context().spanIdStr);
+        });
         it('should not add child if stack is empty', async () => {
             await tracer.init({
                 tracerConfig: {
