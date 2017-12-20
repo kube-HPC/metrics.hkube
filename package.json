@@ -15,6 +15,7 @@
     "djsv": "^3.0.3",
     "jaeger-client": "^3.7.0",
     "opentracing": "^0.14.1",
+    "optional": "^0.1.4",
     "prom-client": "^10.2.2",
     "uuid": "^3.1.0"
   },
