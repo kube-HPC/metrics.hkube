@@ -1,5 +1,6 @@
 const { tracer } = require('../index');
 const { InMemoryReporter, ConstSampler, RemoteReporter } = require('jaeger-client');
+const opentracing = require('opentracing');
 const chai = require('chai');
 const { expect } = chai;
 const chaiAsPromised = require('chai-as-promised');
@@ -133,6 +134,25 @@ describe('Tracer', () => {
             span.finish();
             expect(tracer._getSpanStack(span.id)).to.be.empty;
             expect(tracer._tracer._reporter.spans).to.have.lengthOf(1);
+        });
+        it('should finish span with error', async () => {
+            await tracer.init({
+                tracerConfig: {
+                    serviceName: 'test',
+                },
+                tracerOptions: {
+                    reporter: new InMemoryReporter()
+                }
+
+            });
+            const span = tracer.startSpan({ name: 'test1' });
+            expect(tracer._spanStacks.get(span.id)).to.have.lengthOf(1);
+            expect(tracer._tracer._reporter.spans).to.be.empty;
+            span.finish(new Error('Oh no!!!'));
+            expect(tracer._getSpanStack(span.id)).to.be.empty;
+            expect(tracer._tracer._reporter.spans).to.have.lengthOf(1);
+            expect(tracer._tracer._reporter.spans[0]._tags).to.deep.include({ key: opentracing.Error, value: true });
+            expect(tracer._tracer._reporter.spans[0]._tags).to.deep.include({ key: 'errorMessage', value: 'Oh no!!!' });
         });
         it('should add tags', async () => {
             await tracer.init({
