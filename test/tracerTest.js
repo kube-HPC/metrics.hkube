@@ -312,7 +312,23 @@ describe('Tracer', () => {
             expect(tracer.topSpan('dummyId')).to.not.exist;
             expect(tracer.pop('dummyId')).to.not.exist;
         });
-
+        it('should return the latest span when calling topSpan', async () => {
+            await tracer.init({
+                tracerConfig: {
+                    serviceName: 'test',
+                },
+                tracerOptions: {
+                    reporter: new InMemoryReporter()
+                }
+            });
+            const first = tracer.startSpan({ name: 'first', id: 'id1' });
+            const second = tracer.startSpan({ name: 'second', id: 'id1' });
+            let top = tracer.topSpan('id1');
+            expect(top).to.eql(second);
+            top.finish();
+            top = tracer.topSpan('id1');
+            expect(top).to.eql(first);
+        });
         it('should support 2 span stacks', async () => {
             await tracer.init({
                 tracerConfig: {
