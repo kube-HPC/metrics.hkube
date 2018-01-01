@@ -172,6 +172,25 @@ describe('Tracer', () => {
             expect(tracer._tracer._reporter.spans).to.have.lengthOf(1);
             expect(tracer._tracer._reporter.spans[0]._tags).to.deep.include({ key: 'tagKey', value: 'tagValue' });
         });
+        it('should add tags from options', async () => {
+            await tracer.init({
+                tracerConfig: {
+                    serviceName: 'test',
+                },
+                tracerOptions: {
+                    reporter: new InMemoryReporter()
+                }
+
+            });
+            const span = tracer.startSpan({ name: 'test1', tags: { optTag: 'optTagValue' } });
+            const tag = { tagKey: 'tagValue' };
+            span.addTag(tag);
+            expect(tracer._tracer._reporter.spans).to.be.empty;
+            span.finish();
+            expect(tracer._tracer._reporter.spans).to.have.lengthOf(1);
+            expect(tracer._tracer._reporter.spans[0]._tags).to.deep.include({ key: 'tagKey', value: 'tagValue' });
+            expect(tracer._tracer._reporter.spans[0]._tags).to.deep.include({ key: 'optTag', value: 'optTagValue' });
+        });
         it('should add multiple tags', async () => {
             await tracer.init({
                 tracerConfig: {
