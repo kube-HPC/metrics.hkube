@@ -1,6 +1,6 @@
 const metrics = require('../index');
 const chai = require('chai');
-const expect = chai.expect;
+const {expect} = chai;
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const client = require('prom-client');
@@ -121,7 +121,7 @@ describe('Init metrics', () => {
             name: 'm1',
             labels: ['l1', 'l2']
         });
-        const id = measure.start({ id: 'xxx' });
+        measure.start({ id: 'xxx' });
         expect(() => measure.end({})).to.throw('id must be specified');
     });
     it('Should throw if end called without internal measure', async () => {
