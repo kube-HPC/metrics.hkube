@@ -1,6 +1,6 @@
 const metrics = require('../index');
 const chai = require('chai');
-const {expect} = chai;
+const { expect } = chai;
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const client = require('prom-client');
@@ -40,6 +40,12 @@ describe('Init metrics', () => {
         metrics.addTimeMeasure({ name: 'm1' });
         expect(() => metrics.addTimeMeasure({ name: 'm1' })).to.throw('the measure m1 is already registered');
     });
+    it('should not throw if removing a non-existent measure', async () => {
+        await metrics.init(config.metrics);
+        expect(metrics._metrics.size).to.eq(0);
+        metrics.removeMeasure('m1');
+        expect(metrics._metrics.size).to.eq(0);
+    });
     it('Should add without labels', async () => {
         await metrics.init(config.metrics);
         expect(metrics._metrics.size).to.eq(0);
@@ -61,6 +67,22 @@ describe('Init metrics', () => {
         expect(metrics._metrics.size).to.eq(1);
         metrics.removeMeasure('m1');
         expect(metrics._metrics.size).to.eq(0);
+    });
+    it('Should add and remove and add time measure', async () => {
+        await metrics.init(config.metrics);
+        expect(metrics._metrics.size).to.eq(0);
+        metrics.addTimeMeasure({
+            name: 'm1',
+            labels: ['l1', 'l2']
+        });
+        expect(metrics._metrics.size).to.eq(1);
+        metrics.removeMeasure('m1');
+        expect(metrics._metrics.size).to.eq(0);
+        metrics.addTimeMeasure({
+            name: 'm1',
+            labels: ['l1', 'l2']
+        });
+        expect(metrics._metrics.size).to.eq(1);
     });
     it('Should return measure', async () => {
         await metrics.init(config.metrics);

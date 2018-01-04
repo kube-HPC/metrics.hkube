@@ -50,6 +50,22 @@ describe('Gauge Measure', () => {
         metrics.removeMeasure('m1');
         expect(metrics._metrics.size).to.eq(0);
     });
+    it('Should add and remove and add time measure', async () => {
+        await metrics.init(config.metrics);
+        expect(metrics._metrics.size).to.eq(0);
+        metrics.addGaugeMeasure({
+            name: 'm1',
+            labels: ['l1', 'l2']
+        });
+        expect(metrics._metrics.size).to.eq(1);
+        metrics.removeMeasure('m1');
+        expect(metrics._metrics.size).to.eq(0);
+        metrics.addGaugeMeasure({
+            name: 'm1',
+            labels: ['l1', 'l2']
+        });
+        expect(metrics._metrics.size).to.eq(1);
+    });
     it('Should return measure', async () => {
         await metrics.init(config.metrics);
         const measure = metrics.addGaugeMeasure({
