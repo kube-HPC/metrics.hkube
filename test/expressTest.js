@@ -1,4 +1,4 @@
-const metrics = require('../index');
+const {metrics} = require('../index');
 const { expect } = require('chai');
 const client = require('prom-client');
 const RestServer = require('@hkube/rest-server');
