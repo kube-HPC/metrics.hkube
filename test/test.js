@@ -1,4 +1,4 @@
-const metrics = require('../index');
+const {metrics} = require('../index');
 const chai = require('chai');
 const { expect } = chai;
 const chaiAsPromised = require('chai-as-promised');
@@ -213,5 +213,39 @@ describe('Init metrics', () => {
         expect(measure._startedMeasures).to.be.empty;
         expect(client.register.metrics()).to.include('m1_counter 1');
         expect(client.register.metrics()).to.include('m1_histogram_count 1');
+    });
+
+
+    it('Should work retroactivly without labels', async () => {
+        await metrics.init(config.metrics);
+        const measure = metrics.addTimeMeasure({
+            name: 'm1',
+            labels: ['l1', 'l2']
+        });
+        measure.retroactive({ time: 3 });
+        expect(measure._startedMeasures).to.be.empty;
+        expect(client.register.metrics()).to.include('m1_counter 1');
+        expect(client.register.metrics()).to.include('m1_histogram_count 1');
+    });
+
+    it('Should work retroactivly with labels', async () => {
+        await metrics.init(config.metrics);
+        const measure = metrics.addTimeMeasure({
+            name: 'm1',
+            labels: ['l1', 'l2']
+        });
+        measure.retroactive({ time: 3, labelValues: { l1: 1, l2: 2 } });
+        expect(measure._startedMeasures).to.be.empty;
+        expect(client.register.metrics()).to.include('m1_counter{l1="1",l2="2"} 1');
+        expect(client.register.metrics()).to.include('m1_histogram_count{l1="1",l2="2"} 1');
+    });
+
+    it('Should throw retroactive without time', async () => {
+        await metrics.init(config.metrics);
+        const measure = metrics.addTimeMeasure({
+            name: 'm1',
+            labels: ['l1', 'l2']
+        });
+        expect(() => measure.retroactive({})).to.throw('time must be specified');
     });
 });

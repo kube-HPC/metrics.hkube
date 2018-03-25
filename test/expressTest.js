@@ -1,5 +1,5 @@
-const metrics = require('../index');
-const {expect} = require('chai');
+const {metrics} = require('../index');
+const { expect } = require('chai');
 const client = require('prom-client');
 const RestServer = require('@hkube/rest-server');
 const httpMocks = require('node-mocks-http');
@@ -15,7 +15,7 @@ describe('With RestServer or internal server', () => {
     beforeEach(() => {
         client.register.clear();
     });
-    
+
     it('should init without server', async () => {
         await metrics.init({
         });
@@ -33,7 +33,7 @@ describe('With RestServer or internal server', () => {
         it('should init with express', async () => {
             await metrics.init(config.metrics);
             const port = await getPort();
-            const {app} = await server.start({
+            const { app } = await server.start({
                 routes: [metrics.getRouter()],
                 port
             });
@@ -47,7 +47,7 @@ describe('With RestServer or internal server', () => {
                     l2: 2
                 }
             });
-            measure.end({id});
+            measure.end({ id });
             const mockResponse = httpMocks.createResponse();
             const mockRequest = httpMocks.createRequest({
                 method: 'GET',
@@ -65,7 +65,7 @@ describe('With RestServer or internal server', () => {
                 }
             });
             const port = await getPort();
-            const {app} = await server.start({
+            const { app } = await server.start({
                 routes: [metrics.getRouter()],
                 port
             });
@@ -79,7 +79,7 @@ describe('With RestServer or internal server', () => {
                     l2: 2
                 }
             });
-            measure.end({id});
+            measure.end({ id });
             const mockResponse = httpMocks.createResponse();
             const mockRequest = httpMocks.createRequest({
                 method: 'GET',
@@ -116,7 +116,7 @@ describe('With RestServer or internal server', () => {
                     l2: 2
                 }
             });
-            measure.end({id});
+            measure.end({ id });
             const mockResponse = httpMocks.createResponse();
             const mockRequest = httpMocks.createRequest({
                 method: 'GET',
@@ -146,7 +146,7 @@ describe('With RestServer or internal server', () => {
                     l2: 2
                 }
             });
-            measure.end({id});
+            measure.end({ id });
             const mockResponse = httpMocks.createResponse();
             const mockRequest = httpMocks.createRequest({
                 method: 'GET',
@@ -162,6 +162,7 @@ describe('With RestServer or internal server', () => {
     describe('with middleware', () => {
         beforeEach(() => {
             server = new RestServer();
+            client.register.clear();
         });
         afterEach(async () => {
             if (server) {
@@ -173,8 +174,7 @@ describe('With RestServer or internal server', () => {
             await metrics.init(config.metrics);
             const port = await getPort();
             const middleware = metrics.getMiddleware();
-            metrics.getMiddleware();
-            const {app} = await server.start(Object.assign({
+            const { app } = await server.start(Object.assign({
                 routes: [metrics.getRouter(), {
                     route: '/testRoute',
                     router: (req, res, next) => {
@@ -192,6 +192,41 @@ describe('With RestServer or internal server', () => {
             app.handle(mockRequest, mockResponse);
             expect(metrics.metrics()).to.include('API_REQUEST_MEASURE_counter{method="GET",route="/testRoute",code="200"} 1');
             expect(metrics.metrics()).to.include('API_REQUEST_MEASURE_histogram_count{method="GET",route="/testRoute",code="200"} 1');
+        });
+
+        it('should ignore /metrics', async () => {
+            await metrics.init(config.metrics);
+            const port = await getPort();
+            const { beforeRoutesMiddlewares, afterRoutesMiddlewares } = metrics.getMiddleware();
+            metrics.getMiddleware();
+            const { app } = await server.start({
+                routes: [
+                    metrics.getRouter(),
+                    {
+                        route: '/testRoute',
+                        router: (req, res, next) => {
+                            res.json('ok');
+                            next();
+                        }
+                    },
+                ],
+                port,
+                beforeRoutesMiddlewares,
+                afterRoutesMiddlewares
+            });
+
+            const mockResponse = httpMocks.createResponse();
+            const mockRequest = httpMocks.createRequest({
+                method: 'GET',
+                url: '/metrics'
+            });
+            return new Promise((resolve, reject) => {
+                app.handle(mockRequest, mockResponse, () => {
+                    expect(metrics.metrics()).to.not.include('API_REQUEST_MEASURE_counter{method="GET",route="/metrics",code="200"} 1');
+                    expect(metrics.metrics()).to.not.include('API_REQUEST_MEASURE_histogram_count{method="GET",route="/metrics",code="200"} 1');
+                    resolve();
+                });
+            });
         });
     });
 });
