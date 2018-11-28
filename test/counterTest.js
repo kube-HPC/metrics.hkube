@@ -84,6 +84,16 @@ describe('Counter Measure', () => {
         const getMeasure = metrics.get('m1');
         expect(getMeasure).to.eql(measure);
     });
+    it('should get measure with prefix by name', async () => {
+        await metrics.init(config.metrics);
+        const measure = metrics.addCounterMeasure({
+            prefix: 'hkube_',
+            name: 'm1',
+            labels: ['l1', 'l2']
+        });
+        const getMeasure = metrics.get('m1');
+        expect(getMeasure).to.eql(measure);
+    });
     it('Should increment measure without labels', async () => {
         await metrics.init(config.metrics);
         const measure = metrics.addCounterMeasure({
