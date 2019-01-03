@@ -49,7 +49,7 @@ describe('Tracer', () => {
             expect(tracer._tracer._reporter).to.be.an.instanceof(InMemoryReporter);
         });
 
-        it.only('should create anotehr tracer with given name regardless of given options', async () => {
+        it('should create anotehr tracer with given name regardless of given options', async () => {
             const rootTrace = 'test';
             const trace2 = 'newTracer';
             const trace3 = 'anotherTracer';
