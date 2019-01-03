@@ -48,6 +48,25 @@ describe('Tracer', () => {
             expect(tracer._tracer._sampler).to.be.an.instanceof(ConstSampler);
             expect(tracer._tracer._reporter).to.be.an.instanceof(InMemoryReporter);
         });
+
+        it.only('should create anotehr tracer with given name regardless of given options', async () => {
+            const rootTrace = 'test';
+            const trace2 = 'newTracer';
+            const trace3 = 'anotherTracer';
+            const trace4 = 'lastTracer';
+            const optionsWithName = {
+                tracerConfig: {
+                    serviceName: rootTrace
+                }
+            };
+            await tracer.init(optionsWithName);
+            const newTracer = await tracer.createTracer(trace2, optionsWithName);
+            expect(newTracer._tracer._serviceName).to.equal(trace2);
+            const anotherTracer = await tracer.createTracer(trace3, { tracerConfig: { } });
+            expect(anotherTracer._tracer._serviceName).to.equal(trace3);
+            const lastTracer = await tracer.createTracer(trace4);
+            expect(lastTracer._tracer._serviceName).to.equal(trace4);
+        });
     });
     describe('Span', () => {
         it('should throw without options', async () => {
