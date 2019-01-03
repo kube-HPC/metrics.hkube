@@ -66,6 +66,8 @@ describe('Tracer', () => {
             expect(anotherTracer._tracer._serviceName).to.equal(trace3);
             const lastTracer = await tracer.createTracer(trace4);
             expect(lastTracer._tracer._serviceName).to.equal(trace4);
+            const moreTracer = await tracer.createTracer('moreTracer', {});
+            expect(moreTracer._tracer._serviceName).to.equal('moreTracer');
         });
     });
     describe('Span', () => {
