@@ -190,8 +190,8 @@ describe('With RestServer or internal server', () => {
                 url: '/testRoute'
             });
             app.handle(mockRequest, mockResponse);
-            expect(metrics.metrics()).to.include('API_REQUEST_MEASURE_counter{method="GET",route="/testRoute",code="200"} 1');
-            expect(metrics.metrics()).to.include('API_REQUEST_MEASURE_histogram_count{method="GET",route="/testRoute",code="200"} 1');
+            expect(metrics.metrics()).to.include('API_REQUEST_MEASURE_counter{method="GET",code="200"} 1');
+            expect(metrics.metrics()).to.include('API_REQUEST_MEASURE_histogram_count{method="GET",code="200"} 1');
         });
 
         it('should ignore /metrics', async () => {
