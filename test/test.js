@@ -31,6 +31,10 @@ describe('Init metrics', () => {
         await metrics.init();
         expect(() => metrics.addTimeMeasure({})).to.throw("data should have required property 'name'");
     });
+    it('Should throw with empty name', async () => {
+        await metrics.init();
+        expect(() => metrics.addTimeMeasure({name: ''})).to.throw('data.name should NOT be shorter than 1 characters');
+    });
     it('Should throw if no options', async () => {
         await metrics.init();
         expect(() => metrics.addTimeMeasure()).to.throw("data should have required property 'name'");
