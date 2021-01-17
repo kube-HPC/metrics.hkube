@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@hkube/rest-server": "^1.0.16",
-    "ajv": "^6.12.0",
+    "ajv": "^6.12.3",
     "express": "^4.16.0",
     "jaeger-client": "^3.7.0",
     "opentracing": "^0.14.1",
