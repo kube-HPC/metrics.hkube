@@ -1,4 +1,4 @@
-const {metrics} = require('../index');
+const { metrics } = require('../index');
 const chai = require('chai');
 const { expect } = chai;
 const chaiAsPromised = require('chai-as-promised');
@@ -111,10 +111,10 @@ describe('Counter Measure', () => {
             name: 'm1',
             labels: ['l1', 'l2']
         });
-        measure.inc({labelValues: { l1: 'l1Val' }});
-        measure.inc({labelValues: { l1: 'l1Val' }});
+        measure.inc({ labelValues: { l1: 'l1Val' } });
+        measure.inc({ labelValues: { l1: 'l1Val' } });
         expect(client.register.metrics()).to.include('m1_counter{l1="l1Val"} 2');
-        measure.inc({labelValues: { l1: 'l1Val2' }});
+        measure.inc({ labelValues: { l1: 'l1Val2' } });
         expect(client.register.metrics()).to.include('m1_counter{l1="l1Val2"} 1');
     });
 });
