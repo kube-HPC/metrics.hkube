@@ -18,7 +18,7 @@
     "jaeger-client": "^3.7.0",
     "opentracing": "^0.14.1",
     "prom-client": "^10.2.2",
-    "uuid": "^3.1.0"
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
