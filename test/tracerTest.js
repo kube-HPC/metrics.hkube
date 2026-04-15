@@ -69,6 +69,26 @@ describe('Tracer', () => {
             const moreTracer = await tracer.createTracer('moreTracer', {});
             expect(moreTracer._tracer._serviceName).to.equal('moreTracer');
         });
+
+        it('should close tracer', async () => {
+            await tracer.init({
+                tracerConfig: {
+                    serviceName: 'test',
+                },
+                tracerOptions: {
+                    reporter: new InMemoryReporter()
+                }
+
+            });
+            expect(tracer._tracer).to.exist;
+            await tracer.close();
+            expect(tracer._tracer).to.not.exist;
+        });
+
+        it('should close without tracer', async () => {
+            await tracer.close();
+            expect(tracer._tracer).to.not.exist;
+        });
     });
     describe('Span', () => {
         it('should throw without options', async () => {
