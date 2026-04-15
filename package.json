@@ -3,6 +3,10 @@
   "version": "1.0.43",
   "description": "",
   "main": "index.js",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/kube-HPC/metrics.hkube.git"
+    },
   "scripts": {
     "test": "NODE_ENV=test node_modules/mocha/bin/mocha test --colors --recursive --exit",
     "test-travis": "NODE_ENV=test ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec test --exit",
