@@ -49,9 +49,9 @@ jobs:
                 git config --local user.name "GitHub Action"
           - name: version
             run: |
-                git checkout -f -b version-branch
-                npm version patch --no-commit-hooks -m "$(git log -1 --pretty=%B) .... bump version [skip ci]"
-                git push origin version-branch:main --follow-tags
+              git checkout -f -b version-branch
+              npm version patch --no-commit-hooks -m "$(git log -1 --pretty=%B) .... bump version [skip ci]"
+              git push origin version-branch:master --follow-tags
           - uses: actions/setup-node@v4 # Use v4 for OIDC support
             with:
                 node-version: 24 # Use a modern Node version
